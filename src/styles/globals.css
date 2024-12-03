@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #6B46C1;
+  --primary-light: #9F7AEA;
+  --secondary: #4A5568;
+  --background: #F7FAFC;
+  --surface: #FFFFFF;
+  --text: #2D3748;
+  --text-light: #718096;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  @apply bg-background text-text;
+}
+
+.nav-item {
+  @apply flex flex-col items-center justify-center px-4 py-2;
+}
+
+.nav-item.active {
+  @apply text-primary;
+}
+
+.page-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
