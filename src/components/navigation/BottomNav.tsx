@@ -1,6 +1,5 @@
-import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Calendar, Heart, ShoppingBag, Settings } from 'lucide-react';
+import { Home, Calendar, Heart, ShoppingBag, List, ShoppingCart, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const BottomNav = () => {
@@ -11,7 +10,8 @@ const BottomNav = () => {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/calendar', icon: Calendar, label: 'Calendar' },
     { path: '/memories', icon: Heart, label: 'Memories' },
-    { path: '/lists', icon: ShoppingBag, label: 'Lists' },
+    { path: '/lists', icon: List, label: 'Lists' },
+    { path: '/shopping', icon: ShoppingCart, label: 'Shopping' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 

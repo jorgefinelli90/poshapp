@@ -10,6 +10,7 @@ const Calendar = React.lazy(() => import('./pages/Calendar'));
 const Memories = React.lazy(() => import('./pages/Memories'));
 const Lists = React.lazy(() => import('./pages/Lists'));
 const Settings = React.lazy(() => import('./pages/Settings'));
+const ShoppingListPage = React.lazy(() => import('./pages/ShoppingListPage')); // Added import statement
 
 function App() {
   return (
@@ -54,6 +55,15 @@ function App() {
               <ProtectedRoute>
                 <div className="min-h-screen bg-background pb-16">
                   <Lists />
+                  <BottomNav />
+                </div>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/shopping" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background pb-16">
+                  <ShoppingListPage />
                   <BottomNav />
                 </div>
               </ProtectedRoute>
