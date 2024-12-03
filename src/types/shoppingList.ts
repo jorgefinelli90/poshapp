@@ -6,14 +6,12 @@ export interface ShoppingItem {
   notes?: string;
   purchased: boolean;
   createdBy?: string; // email del usuario que creó el item
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface ShoppingList {
   id: string;
-  userId: string;
   items: ShoppingItem[];
-  createdAt: Date;
-  updatedAt: Date;
+  updatedAt: any;
 }
