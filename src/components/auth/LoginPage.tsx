@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../ui/Button';
 import { useAuthContext } from '../../context/AuthContext';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const { signInWithEmailAndPassword } = useAuthContext(); // Asegúrate de tener esta función en el contexto
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +18,8 @@ const LoginPage = () => {
       setLoading(true);
       setError(null);
       await signInWithEmailAndPassword(email, password);
+      // Redirigir al home después del inicio de sesión exitoso
+      navigate('/');
     } catch (err: any) {
       if (err.code === 'auth/user-not-found') {
         setError('No account found with this email.');
@@ -26,6 +30,12 @@ const LoginPage = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSignIn();
     }
   };
 
@@ -71,6 +81,7 @@ const LoginPage = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyPress={handleKeyPress}
               className="w-full p-3 border rounded-lg text-sm bg-white focus:outline-none focus:ring focus:border-primary"
             />
             <input
@@ -78,6 +89,7 @@ const LoginPage = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyPress={handleKeyPress}
               className="w-full p-3 border rounded-lg text-sm bg-white focus:outline-none focus:ring focus:border-primary"
             />
           </div>
