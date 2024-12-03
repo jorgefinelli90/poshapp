@@ -7,44 +7,66 @@ import {
   getDocs,
   query,
   where,
-  onSnapshot
+  onSnapshot,
+  getDoc
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { ShoppingItem, ShoppingList } from '../types/shoppingList';
 
 const COLLECTION_NAME = 'shoppingLists';
 
-export const createShoppingList = async (userId: string): Promise<string> => {
-  const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-    userId,
-    items: [],
-    createdAt: new Date(),
-    updatedAt: new Date()
-  });
-  return docRef.id;
+const getUserListRef = async () => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Usuario no autenticado');
+
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('userId', '==', user.uid)
+  );
+
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) {
+    // Si no existe una lista, crear una nueva
+    const newListRef = await addDoc(collection(db, COLLECTION_NAME), {
+      userId: user.uid,
+      items: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    return newListRef;
+  }
+
+  // Retornar la referencia a la lista existente
+  return doc(db, COLLECTION_NAME, querySnapshot.docs[0].id);
 };
 
-export const addItem = async (listId: string, item: Omit<ShoppingItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> => {
-  const listRef = doc(db, COLLECTION_NAME, listId);
+export const addItem = async (item: Omit<ShoppingItem, 'id' | 'createdBy' | 'createdAt' | 'updatedAt'>): Promise<void> => {
+  const listRef = await getUserListRef();
+  const listSnap = await getDoc(listRef);
+  const listData = listSnap.data() as ShoppingList;
+  const user = auth.currentUser;
+  if (!user?.email) throw new Error('Usuario no autenticado');
+
   const newItem: ShoppingItem = {
     ...item,
     id: crypto.randomUUID(),
+    createdBy: user.email,
     createdAt: new Date(),
     updatedAt: new Date()
   };
-  
-  const currentItems = await getItems(listId);
+
   await updateDoc(listRef, {
-    items: [...currentItems, newItem],
+    items: [...(listData.items || []), newItem],
     updatedAt: new Date()
   });
 };
 
-export const updateItem = async (listId: string, itemId: string, updates: Partial<ShoppingItem>): Promise<void> => {
-  const listRef = doc(db, COLLECTION_NAME, listId);
-  const currentItems = await getItems(listId);
-  
-  const updatedItems = currentItems.map(item => 
+export const updateItem = async (itemId: string, updates: Partial<ShoppingItem>): Promise<void> => {
+  const listRef = await getUserListRef();
+  const listSnap = await getDoc(listRef);
+  const listData = listSnap.data() as ShoppingList;
+
+  const updatedItems = (listData.items || []).map(item => 
     item.id === itemId 
       ? { ...item, ...updates, updatedAt: new Date() }
       : item
@@ -56,32 +78,39 @@ export const updateItem = async (listId: string, itemId: string, updates: Partia
   });
 };
 
-export const deleteItem = async (listId: string, itemId: string): Promise<void> => {
-  const listRef = doc(db, COLLECTION_NAME, listId);
-  const currentItems = await getItems(listId);
-  
+export const deleteItem = async (itemId: string): Promise<void> => {
+  const listRef = await getUserListRef();
+  const listSnap = await getDoc(listRef);
+  const listData = listSnap.data() as ShoppingList;
+
   await updateDoc(listRef, {
-    items: currentItems.filter(item => item.id !== itemId),
+    items: (listData.items || []).filter(item => item.id !== itemId),
     updatedAt: new Date()
   });
 };
 
-export const getItems = async (listId: string): Promise<ShoppingItem[]> => {
-  const listRef = doc(db, COLLECTION_NAME, listId);
-  const q = query(collection(db, COLLECTION_NAME), where('userId', '==', listId));
-  const querySnapshot = await getDocs(q);
-  const list = querySnapshot.docs[0]?.data() as ShoppingList;
-  return list?.items || [];
+export const getItems = async (): Promise<ShoppingItem[]> => {
+  const listRef = await getUserListRef();
+  const listSnap = await getDoc(listRef);
+  const listData = listSnap.data() as ShoppingList;
+  return listData?.items || [];
 };
 
-export const subscribeToShoppingList = (
-  userId: string,
-  onUpdate: (items: ShoppingItem[]) => void
-) => {
-  const q = query(collection(db, COLLECTION_NAME), where('userId', '==', userId));
+export const subscribeToShoppingList = (onUpdate: (items: ShoppingItem[]) => void) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Usuario no autenticado');
+
+  const q = query(
+    collection(db, COLLECTION_NAME),
+    where('userId', '==', user.uid)
+  );
   
   return onSnapshot(q, (snapshot) => {
-    const list = snapshot.docs[0]?.data() as ShoppingList;
-    onUpdate(list?.items || []);
+    if (!snapshot.empty) {
+      const listData = snapshot.docs[0].data() as ShoppingList;
+      onUpdate(listData?.items || []);
+    } else {
+      onUpdate([]);
+    }
   });
 };

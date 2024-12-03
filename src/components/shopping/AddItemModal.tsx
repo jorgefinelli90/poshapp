@@ -50,21 +50,26 @@ const AddItemModal = ({ isOpen, onClose, onAdd, editItem }: AddItemModalProps) =
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
-      <div className="relative bg-white rounded-lg p-6 w-full max-w-md mx-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="relative bg-surface rounded-lg p-6 w-full max-w-md mx-auto shadow-lg"
+      >
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-500"
+          className="absolute top-4 right-4 p-2 rounded-full text-text-light hover:text-text hover:bg-gray-100 transition-colors"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold text-text mb-6">
           {editItem ? 'Editar Item' : 'Agregar Item'}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-text mb-1">
               Nombre
             </label>
             <input
@@ -72,20 +77,21 @@ const AddItemModal = ({ isOpen, onClose, onAdd, editItem }: AddItemModalProps) =
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
+              placeholder="Ingresa el nombre del item"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="category" className="block text-sm font-medium text-text mb-1">
               Categoría
             </label>
             <select
               id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -96,7 +102,7 @@ const AddItemModal = ({ isOpen, onClose, onAdd, editItem }: AddItemModalProps) =
           </div>
 
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="quantity" className="block text-sm font-medium text-text mb-1">
               Cantidad
             </label>
             <input
@@ -105,13 +111,13 @@ const AddItemModal = ({ isOpen, onClose, onAdd, editItem }: AddItemModalProps) =
               min="1"
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="notes" className="block text-sm font-medium text-text mb-1">
               Notas (opcional)
             </label>
             <textarea
@@ -119,12 +125,13 @@ const AddItemModal = ({ isOpen, onClose, onAdd, editItem }: AddItemModalProps) =
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors resize-none"
+              placeholder="Agrega notas adicionales..."
             />
           </div>
 
-          <div className="flex justify-end space-x-3 mt-6">
-            <Button variant="secondary" onClick={handleClose}>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={handleClose}>
               Cancelar
             </Button>
             <Button type="submit">
@@ -132,7 +139,7 @@ const AddItemModal = ({ isOpen, onClose, onAdd, editItem }: AddItemModalProps) =
             </Button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </Modal>
   );
 };

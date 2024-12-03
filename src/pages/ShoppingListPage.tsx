@@ -34,28 +34,18 @@ const ShoppingListPage = () => {
 
   useEffect(() => {
     if (user) {
-      // Inicializar o cargar la lista de compras
-      const initializeList = async () => {
-        const id = await createShoppingList(user.uid);
-        setListId(id);
-      };
-
-      // Suscribirse a cambios en la lista
-      const unsubscribe = subscribeToShoppingList(user.uid, (updatedItems) => {
+      const unsubscribe = subscribeToShoppingList((updatedItems) => {
         setItems(updatedItems);
       });
-
-      if (!listId) {
-        initializeList();
-      }
-
       return () => unsubscribe();
     }
   }, [user]);
 
-  const handleAddItem = async (newItem: Omit<ShoppingItem, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (listId) {
-      await addItem(listId, newItem);
+  const handleAddItem = async (item: Omit<ShoppingItem, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      await addItem(item);
+    } catch (error) {
+      console.error('Error al agregar item:', error);
     }
   };
 
@@ -64,22 +54,27 @@ const ShoppingListPage = () => {
     setShowAddModal(true);
   };
 
-  const handleUpdateItem = async (updates: Partial<ShoppingItem>) => {
-    if (listId && editingItem) {
-      await updateItem(listId, editingItem.id, updates);
-      setEditingItem(undefined);
+  const handleUpdateItem = async (item: ShoppingItem, updates: Partial<ShoppingItem>) => {
+    try {
+      await updateItem(item.id, updates);
+    } catch (error) {
+      console.error('Error al actualizar item:', error);
     }
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    if (listId) {
-      await deleteItem(listId, itemId);
+    try {
+      await deleteItem(itemId);
+    } catch (error) {
+      console.error('Error al eliminar item:', error);
     }
   };
 
   const handleToggleItem = async (item: ShoppingItem) => {
-    if (listId) {
-      await updateItem(listId, item.id, { purchased: !item.purchased });
+    try {
+      await updateItem(item.id, { purchased: !item.purchased });
+    } catch (error) {
+      console.error('Error al actualizar estado del item:', error);
     }
   };
 
@@ -90,74 +85,120 @@ const ShoppingListPage = () => {
     navigator.clipboard.writeText(listText);
   };
 
+  const getCreatorInfo = (email: string | undefined) => {
+    if (!email) return { name: 'Desconocido', emoji: '👤' };
+    const emailLower = email.toLowerCase();
+    if (emailLower.startsWith('j')) {
+      return { name: 'Jorge', emoji: '👨Jorge' };
+    } else if (emailLower.startsWith('n')) {
+      return { name: 'Nhorie', emoji: '👩Nhorie' };
+    }
+    return { name: email, emoji: '👤' };
+  };
+
+  const itemsByCategory = categories.map(category => {
+    const categoryItems = items.filter(item => item.category === category);
+    if (categoryItems.length === 0) return null;
+
+    return (
+      <Card key={category} className="overflow-hidden">
+        <h2 className="text-lg font-semibold mb-4 text-primary">{category}</h2>
+        <div className="space-y-3">
+          {categoryItems.map(item => {
+            const creator = getCreatorInfo(item.createdBy);
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-200 ${
+                  item.purchased 
+                    ? 'bg-gray-50 opacity-75' 
+                    : 'bg-white shadow-sm hover:shadow-md'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div 
+                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${
+                      item.purchased 
+                        ? 'border-primary bg-primary text-white' 
+                        : 'border-gray-300 hover:border-primary'
+                    }`}
+                    onClick={() => handleToggleItem(item)}
+                  >
+                    {item.purchased && <span className="text-xs">✓</span>}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className={`font-medium transition-all ${
+                        item.purchased ? 'line-through text-gray-400' : 'text-text'
+                      }`}>
+                        {item.name}
+                        <span className="ml-1 text-sm text-text-light">
+                          ({item.quantity})
+                        </span>
+                      </span>
+                      <span 
+                        title={`Agregado por ${creator.name}`} 
+                        className="text-lg opacity-75 hover:opacity-100"
+                      >
+                        {creator.emoji}
+                      </span>
+                    </div>
+                    {item.notes && (
+                      <p className="text-sm text-text-light mt-1">{item.notes}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEditItem(item)}
+                    className="p-2 text-text-light hover:text-primary transition-colors rounded-full hover:bg-gray-100"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteItem(item.id)}
+                    className="p-2 text-text-light hover:text-red-500 transition-colors rounded-full hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </Card>
+    );
+  });
+
   return (
     <PageContainer>
-      <div className="space-y-4">
-        {/* Header */}
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Lista de Compras</h1>
-          <div className="flex gap-2">
-            <Button onClick={handleCopyList} variant="secondary">
-              <Copy className="w-4 h-4 mr-2" />
+          <h1 className="text-2xl font-bold text-text">Lista de Compras</h1>
+          <div className="flex gap-3">
+            <Button 
+              onClick={handleCopyList} 
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Copy className="w-4 h-4" />
               Copiar Lista
             </Button>
-            <Button onClick={() => setShowAddModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button 
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
               Agregar Item
             </Button>
           </div>
         </div>
 
-        {/* Categories */}
-        <div className="grid gap-4">
-          {categories.map(category => (
-            <Card key={category}>
-              <h2 className="text-lg font-semibold mb-2">{category}</h2>
-              <div className="space-y-2">
-                {items
-                  .filter(item => item.category === category)
-                  .map(item => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
-                    >
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={item.purchased}
-                          onChange={() => handleToggleItem(item)}
-                          className="form-checkbox h-5 w-5 text-primary rounded"
-                        />
-                        <div>
-                          <span className={item.purchased ? 'line-through text-gray-400' : ''}>
-                            {item.name} ({item.quantity})
-                          </span>
-                          {item.notes && (
-                            <p className="text-sm text-gray-500">{item.notes}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEditItem(item)}
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteItem(item.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-              </div>
-            </Card>
-          ))}
+        <div className="grid gap-6">
+          {itemsByCategory}
         </div>
       </div>
 
@@ -167,7 +208,7 @@ const ShoppingListPage = () => {
           setShowAddModal(false);
           setEditingItem(undefined);
         }}
-        onAdd={editingItem ? handleUpdateItem : handleAddItem}
+        onAdd={editingItem ? (item) => handleUpdateItem(editingItem, item) : handleAddItem}
         editItem={editingItem}
       />
     </PageContainer>
