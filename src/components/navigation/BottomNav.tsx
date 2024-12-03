@@ -10,7 +10,6 @@ const BottomNav = () => {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/calendar', icon: Calendar, label: 'Calendar' },
     { path: '/memories', icon: Heart, label: 'Memories' },
-    { path: '/lists', icon: List, label: 'Lists' },
     { path: '/shopping', icon: ShoppingCart, label: 'Shopping' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];

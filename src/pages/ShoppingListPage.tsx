@@ -31,11 +31,14 @@ const ShoppingListPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingItem | undefined>();
   const [listId, setListId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
+      setIsLoading(true);
       const unsubscribe = subscribeToShoppingList((updatedItems) => {
         setItems(updatedItems);
+        setIsLoading(false);
       });
       return () => unsubscribe();
     }
@@ -198,7 +201,13 @@ const ShoppingListPage = () => {
         </div>
 
         <div className="grid gap-6">
-          {itemsByCategory}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <span className="text-lg animate-pulse">Cargando lista de compras...</span>
+            </div>
+          ) : (
+            itemsByCategory
+          )}
         </div>
       </div>
 
