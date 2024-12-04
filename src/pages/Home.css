@@ -1,0 +1,12 @@
+.home-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('https://firebasestorage.googleapis.com/v0/b/accfit-4d42e.appspot.com/o/background.jpg?alt=media&token=384fe9c9-99d8-41a6-a26a-8626876a5698');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.2;
+  z-index: -1;
+}

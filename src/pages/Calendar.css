@@ -1,0 +1,38 @@
+.fc .fc-button {
+  padding: 4px 8px !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.fc .fc-button-primary {
+  background-color: transparent !important;
+  border: none !important;
+  color: #666 !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-button-primary:not(:disabled):active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #f3f4f6 !important;
+  border: none !important;
+  color: #333 !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #f3f4f6 !important;
+  color: #333 !important;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  text-transform: capitalize;
+  color: #4a5568 !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* Reducir el tamaño de los iconos de las flechas */
+.fc .fc-icon {
+  font-size: 0.875rem !important;
+}

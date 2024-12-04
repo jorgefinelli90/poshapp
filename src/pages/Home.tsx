@@ -12,6 +12,7 @@ import { Memory } from '../types/Memory';
 import EventsList from '../components/calendar/EventsList';
 import { eventService } from '../services/eventService';
 import { EventInput } from '@fullcalendar/core';
+import './Home.css';
 
 const formatTimeAgo = (timestamp: any) => {
   const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -120,92 +121,99 @@ const Home = () => {
   };
 
   return (
-    <PageContainer>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Posh App</h1>
-        <Heart className="text-primary" size={24} />
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <Card>
-          <Target className="text-primary mb-2" size={24} />
-          <h3 className="font-semibold mb-2">Goals</h3>
-          <p className="text-sm text-text-light">2 pending</p>
-        </Card>
-        <Link to="/shopping" className="block">
-          <Card className="cursor-pointer transition-all hover:shadow-md h-full">
-            <ShoppingBag className="text-primary mb-2" size={24} />
-            <h3 className="font-semibold mb-2">Shopping List</h3>
-            <p className="text-sm text-text-light">
-              {isLoading ? (
-                <span className="inline-block animate-pulse">Cargando...</span>
-              ) : (
-                `${items.length} ${items.length === 1 ? 'item' : 'items'}`
-              )}
-            </p>
-            {!isLoading && lastChange && (
-              <p className="text-xs text-text-light mt-1">
-                {formatTimeAgo(lastChange.item.updatedAt)}, {getCreatorInfo(lastChange.item.createdBy).name} {lastChange.action} un producto
-              </p>
-            )}
+    <div
+      className="relative min-h-screen bg-cover bg-center"
+      style={{
+        backgroundImage: "linear-gradient(rgb(255 255 255 / 88%), rgb(255 255 255 / 10%)), url('https://firebasestorage.googleapis.com/v0/b/accfit-4d42e.appspot.com/o/background.jpg?alt=media&token=384fe9c9-99d8-41a6-a26a-8626876a5698')"
+      }}
+    >
+      <PageContainer>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Posh App</h1>
+          <Heart className="text-primary" size={24} />
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card>
+            <Target className="text-primary mb-2" size={24} />
+            <h3 className="font-semibold mb-2">Objetivos</h3>
+            <p className="text-sm text-text-light">2 pending</p>
           </Card>
-        </Link>
-      </div>
-
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Recent Memories</h2>
-          <Link to="/memories" className="text-primary text-sm">
-            Ver todas
+          <Link to="/shopping" className="block">
+            <Card className="cursor-pointer transition-all hover:shadow-md h-full">
+              <ShoppingBag className="text-primary mb-2" size={24} />
+              <h3 className="font-semibold mb-2">Shopping List</h3>
+              <p className="text-sm text-text-light">
+                {isLoading ? (
+                  <span className="inline-block animate-pulse">Cargando...</span>
+                ) : (
+                  `${items.length} ${items.length === 1 ? 'item' : 'items'}`
+                )}
+              </p>
+              {!isLoading && lastChange && (
+                <p className="text-xs text-text-light mt-1">
+                  {formatTimeAgo(lastChange.item.updatedAt)}, {getCreatorInfo(lastChange.item.createdBy).name} {lastChange.action} un producto
+                </p>
+              )}
+            </Card>
           </Link>
         </div>
-        <div className="h-[40vh] overflow-y-auto space-y-4 pb-4">
-          {isLoadingMemories ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
-            </div>
-          ) : memories.length > 0 ? (
-            memories.map((memory) => (
-              <Card key={memory.id} className="cursor-pointer hover:shadow-md transition-all">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-semibold">{memory.authorName}</p>
-                    <p className="text-sm text-text-light">
-                      {formatTimeAgo(memory.createdAt)}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm mb-3 line-clamp-3">{memory.text}</p>
-                <div className="flex items-center gap-4 text-sm text-text-light">
-                  <span className="flex items-center gap-1">
-                    <Heart 
-                      size={14} 
-                      className={memory.likes.includes(user?.uid || '') ? 'fill-primary text-primary' : ''}
-                    />
-                    {memory.likes.length}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MessageCircle size={14} />
-                    {memory.comments.length}
-                  </span>
-                </div>
-              </Card>
-            ))
-          ) : (
-            <Card className="text-center py-8">
-              <p className="text-text-light mb-4">No hay memorias aún</p>
-              <Link to="/memories">
-                <Button>
-                  Create Memory
-                </Button>
-              </Link>
-            </Card>
-          )}
-        </div>
-      </div>
 
-      <EventsList events={events} className="mt-4" />
-    </PageContainer>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Ultimos mensajes:</h2>
+            <Link to="/memories" className="text-primary text-sm">
+              Ver todos
+            </Link>
+          </div>
+          <div className="h-[40vh] overflow-y-auto space-y-4 pb-4">
+            {isLoadingMemories ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+              </div>
+            ) : memories.length > 0 ? (
+              memories.map((memory) => (
+                <Card key={memory.id} className="cursor-pointer hover:shadow-md transition-all">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-semibold">{memory.authorName}</p>
+                      <p className="text-sm text-text-light">
+                        {formatTimeAgo(memory.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm mb-3 line-clamp-3">{memory.text}</p>
+                  <div className="flex items-center gap-4 text-sm text-text-light">
+                    <span className="flex items-center gap-1">
+                      <Heart 
+                        size={14} 
+                        className={memory.likes.includes(user?.uid || '') ? 'fill-primary text-primary' : ''}
+                      />
+                      {memory.likes.length}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle size={14} />
+                      {memory.comments.length}
+                    </span>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <Card className="text-center py-8">
+                <p className="text-text-light mb-4">No hay memorias aún</p>
+                <Link to="/memories">
+                  <Button>
+                    Create Memory
+                  </Button>
+                </Link>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        <EventsList events={events} className="mt-4" />
+      </PageContainer>
+    </div>
   );
 };
 

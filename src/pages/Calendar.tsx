@@ -1,23 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PageContainer from '../components/layout/PageContainer';
 import Card from '../components/ui/Card';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus } from 'lucide-react';
 import FullCalendar, { DateSelectArg, EventClickArg, EventDropArg } from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { EventInput } from '@fullcalendar/core';
+import esLocale from '@fullcalendar/core/locales/es';
 import { eventService } from '../services/eventService';
 import { useAuthContext } from '../context/AuthContext';
 import EventModal from '../components/calendar/EventModal';
 import EventsList from '../components/calendar/EventsList';
 import Button from '../components/ui/Button';
+import EventDetailsModal from '../components/calendar/EventDetailsModal';
+import './Calendar.css';
 
 const Calendar = () => {
   const { user } = useAuthContext();
   const [events, setEvents] = useState<EventInput[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const calendarRef = useRef<any>(null);
+  const [isMonthView, setIsMonthView] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -40,7 +46,6 @@ const Calendar = () => {
   }, []);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    console.log('Fecha seleccionada:', selectInfo.start);
     const selectedDate = new Date(selectInfo.start);
     selectedDate.setHours(new Date().getHours());
     selectedDate.setMinutes(new Date().getMinutes());
@@ -67,15 +72,15 @@ const Calendar = () => {
     }
   };
 
-  const handleEventClick = async (clickInfo: EventClickArg) => {
-    if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
-      try {
-        await eventService.deleteEvent(clickInfo.event.id);
-        setEvents(prevEvents => prevEvents.filter(event => event.id !== clickInfo.event.id));
-      } catch (error) {
-        console.error('Error deleting event:', error);
-      }
-    }
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    setSelectedEvent({
+      id: clickInfo.event.id,
+      title: clickInfo.event.title,
+      type: clickInfo.event.extendedProps.type,
+      start: clickInfo.event.start,
+      end: clickInfo.event.end,
+      allDay: clickInfo.event.allDay
+    });
   };
 
   const handleEventDrop = async (dropInfo: EventDropArg) => {
@@ -101,48 +106,136 @@ const Calendar = () => {
   };
 
   return (
-    <PageContainer title="Calendar">
-      <Card className="mb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="text-primary" size={24} />
-            <h2 className="text-lg font-semibold">Calendar</h2>
+    <PageContainer title="Calendario">
+      <div className="relative">
+        <Card className="mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="text-primary" size={20} />
+              <div className="flex items-center space-x-2">
+                <button 
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors text-sm"
+                  onClick={() => {
+                    if (calendarRef.current) {
+                      const api = calendarRef.current.getApi();
+                      setIsMonthView(!isMonthView);
+                      api.changeView(isMonthView ? 'timeGridWeek' : 'dayGridMonth');
+                    }
+                  }}
+                >
+                  {isMonthView ? 'Vista Mensual' : 'Vista Semanal'}
+                </button>
+              </div>
+            </div>
           </div>
-          <Button onClick={() => { 
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            views={{
+              dayGridMonth: {
+                titleFormat: { year: 'numeric', month: 'long' }
+              },
+              timeGridWeek: {
+                titleFormat: { year: 'numeric', month: 'long', day: '2-digit' }
+              }
+            }}
+            locale={esLocale}
+            headerToolbar={{
+              left: 'prev,next today',
+              center: 'title',
+              right: ''
+            }}
+            buttonText={{
+              today: 'Hoy',
+              month: 'Mes',
+              week: 'Semana',
+              prev: '',
+              next: ''
+            }}
+            buttonIcons={{
+              prev: 'chevron-left',
+              next: 'chevron-right'
+            }}
+            events={events}
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            eventColor="#378006"
+            select={handleDateSelect}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
+            height="auto"
+          />
+        </Card>
+
+        <button
+          onClick={() => { 
             setSelectedDate(new Date());
             setModalOpen(true);
-          }}>
-            Add Event
-          </Button>
-        </div>
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek'
           }}
-          events={events}
-          editable={true}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          eventColor="#378006"
-          select={handleDateSelect}
-          eventClick={handleEventClick}
-          eventDrop={handleEventDrop}
+          className="fixed bottom-20 right-4 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-dark transition-colors z-50"
+        >
+          <Plus size={24} />
+        </button>
+
+        {modalOpen && (
+          <EventModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            onSave={handleModalSave}
+            initialDate={selectedDate}
+          />
+        )}
+
+        <EventDetailsModal
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          event={selectedEvent || { title: '', type: '', start: new Date(), end: new Date(), allDay: false }}
+          onDelete={(eventId) => {
+            const deleteEvent = async () => {
+              try {
+                await eventService.deleteEvent(eventId);
+                setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
+                setSelectedEvent(null);
+              } catch (error) {
+                console.error('Error deleting event:', error);
+              }
+            };
+            deleteEvent();
+          }}
+          onEdit={async (eventData) => {
+            try {
+              if (!eventData.title || !eventData.type) {
+                console.error('Error: Title and type fields must be defined.');
+                return;
+              }
+
+              await eventService.updateEvent(eventData.id, {
+                title: eventData.title,
+                type: eventData.type
+              });
+
+              setEvents(prevEvents => 
+                prevEvents.map(event => 
+                  event.id === eventData.id 
+                    ? {...event, title: eventData.title, type: eventData.type}
+                    : event
+                )
+              );
+
+              setSelectedEvent(null);
+            } catch (error) {
+              console.error('Error updating event:', error);
+            }
+          }}
         />
-      </Card>
-      {modalOpen && (
-        <EventModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onSave={handleModalSave}
-          initialDate={selectedDate}
-        />
-      )}
-      <EventsList events={events} className="mt-4" />
+
+        <div className="mt-4">
+          <EventsList events={events} className="bg-white rounded-lg shadow" />
+        </div>
+      </div>
     </PageContainer>
   );
 };

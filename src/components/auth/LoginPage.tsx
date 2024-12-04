@@ -40,11 +40,17 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div
+      className="min-h-screen bg-cover bg-center flex items-center justify-center p-4"
+      style={{
+        backgroundImage: "linear-gradient(rgb(255 255 255 / 88%), rgb(255 255 255 / 10%)), url('https://firebasestorage.googleapis.com/v0/b/accfit-4d42e.appspot.com/o/background.jpg?alt=media&token=384fe9c9-99d8-41a6-a26a-8626876a5698')"
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
+        style={{ transform: 'translateY(-20%)', paddingBottom: '45%' }}
       >
         <div className="text-center mb-8">
           <motion.div
@@ -55,8 +61,8 @@ const LoginPage = () => {
           >
             <Heart className="text-primary w-16 h-16 mb-4" />
           </motion.div>
-          <h1 className="text-3xl font-bold mb-2">Welcome to Posh</h1>
-          <p className="text-text-light">Your private space for moments together</p>
+          <h1 className="text-3xl font-bold mb-2">Posh App!</h1>
+          <p className="text-text">Nuestro espacio para compartir</p>
         </div>
 
         <motion.div
@@ -100,11 +106,11 @@ const LoginPage = () => {
             size="lg"
             loading={loading}
           >
-            Sign in with Email
+            Iniciar sesion
           </Button>
 
-          <p className="text-center text-sm text-text-light">
-            By continuing, you agree to our Terms of Service and Privacy Policy
+          <p className="text-center text-sm text-text">
+            created by Jor!
           </p>
         </motion.div>
       </motion.div>
