@@ -9,6 +9,9 @@ import { memoryService } from '../services/memoryService';
 import { useAuthContext } from '../context/AuthContext';
 import { ShoppingItem } from '../types/shoppingList';
 import { Memory } from '../types/Memory';
+import EventsList from '../components/calendar/EventsList';
+import { eventService } from '../services/eventService';
+import { EventInput } from '@fullcalendar/core';
 
 const formatTimeAgo = (timestamp: any) => {
   const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -43,6 +46,7 @@ const Home = () => {
   const { user } = useAuthContext();
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
+  const [events, setEvents] = useState<EventInput[]>([]);
   const [lastChange, setLastChange] = useState<{ item: ShoppingItem; action: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMemories, setIsLoadingMemories] = useState(true);
@@ -83,6 +87,37 @@ const Home = () => {
       loadMemories();
     }
   }, [user]);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const fetchedEvents = await eventService.getEvents();
+        setEvents(fetchedEvents.map(event => ({
+          id: event.id,
+          title: event.title,
+          start: event.start,
+          end: event.end,
+          allDay: event.allDay,
+          backgroundColor: getEventColor(event.type)
+        })));
+      } catch (error) {
+        console.error('Error loading events:', error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const getEventColor = (type: string) => {
+    switch (type) {
+      case 'cita': return '#FF5733';
+      case 'aniversario': return '#FFC300';
+      case 'plan': return '#DAF7A6';
+      case 'compra': return '#C70039';
+      case 'viaje': return '#900C3F';
+      default: return '#378006';
+    }
+  };
 
   return (
     <PageContainer>
@@ -168,6 +203,8 @@ const Home = () => {
           )}
         </div>
       </div>
+
+      <EventsList events={events} className="mt-4" />
     </PageContainer>
   );
 };

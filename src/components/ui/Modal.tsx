@@ -8,6 +8,8 @@ interface ModalProps {
 }
 
 const Modal = ({ isOpen, onClose, children }: ModalProps) => {
+  if (!isOpen) return null;
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -20,7 +22,7 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black bg-opacity-50" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -34,7 +36,10 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel>
+              <Dialog.Panel className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+                  &times;
+                </button>
                 {children}
               </Dialog.Panel>
             </Transition.Child>
