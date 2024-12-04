@@ -131,21 +131,32 @@ const Calendar = () => {
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            views={{
-              dayGridMonth: {
-                titleFormat: { year: 'numeric', month: 'long' }
-              },
-              timeGridWeek: {
-                titleFormat: { year: 'numeric', month: 'long', day: '2-digit' }
-              }
-            }}
+            initialView={isMonthView ? 'dayGridMonth' : 'timeGridWeek'}
             locale={esLocale}
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
-              right: ''
+              right: 'dayGridMonth,timeGridWeek'
             }}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            weekends={true}
+            events={events}
+            select={handleDateSelect}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
+            dateClick={(info) => {
+              const clickedDate = new Date(info.date);
+              clickedDate.setHours(new Date().getHours());
+              clickedDate.setMinutes(new Date().getMinutes());
+              setSelectedDate(clickedDate);
+              setModalOpen(true);
+            }}
+            longPressDelay={0}
+            selectLongPressDelay={0}
+            eventLongPressDelay={0}
+            selectMinDistance={0}
             buttonText={{
               today: 'Hoy',
               month: 'Mes',
@@ -157,15 +168,7 @@ const Calendar = () => {
               prev: 'chevron-left',
               next: 'chevron-right'
             }}
-            events={events}
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
             eventColor="#378006"
-            select={handleDateSelect}
-            eventClick={handleEventClick}
-            eventDrop={handleEventDrop}
             height="auto"
           />
         </Card>

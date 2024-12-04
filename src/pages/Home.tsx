@@ -166,7 +166,7 @@ const Home = () => {
               Ver todos
             </Link>
           </div>
-          <div className="h-[40vh] overflow-y-auto space-y-4 pb-4">
+          <div className="max-h-[40vh] overflow-y-auto space-y-4 pb-4">
             {isLoadingMemories ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
