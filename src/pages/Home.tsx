@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Target, ShoppingBag } from 'lucide-react';
+import { Heart, Target, ShoppingBag, MessageCircle } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import PageContainer from '../components/layout/PageContainer';
 import { subscribeToShoppingList } from '../services/shoppingListService';
+import { memoryService } from '../services/memoryService';
 import { useAuthContext } from '../context/AuthContext';
 import { ShoppingItem } from '../types/shoppingList';
+import { Memory } from '../types/Memory';
 
 const formatTimeAgo = (timestamp: any) => {
   const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -40,8 +42,10 @@ const Home = () => {
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const [items, setItems] = useState<ShoppingItem[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
   const [lastChange, setLastChange] = useState<{ item: ShoppingItem; action: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMemories, setIsLoadingMemories] = useState(true);
 
   useEffect(() => {
     if (!user) return;
@@ -51,7 +55,6 @@ const Home = () => {
       setItems(newItems);
       setIsLoading(false);
 
-      // Actualizar último cambio
       if (newItems.length > 0) {
         const mostRecent = newItems.reduce((prev, current) => {
           return (current.updatedAt > prev.updatedAt) ? current : prev;
@@ -63,6 +66,24 @@ const Home = () => {
     return () => unsubscribe();
   }, [user]);
 
+  useEffect(() => {
+    const loadMemories = async () => {
+      try {
+        setIsLoadingMemories(true);
+        const recentMemories = await memoryService.getMemories();
+        setMemories(recentMemories.slice(0, 5)); // Mostramos las 5 memorias más recientes
+      } catch (error) {
+        console.error('Error loading memories:', error);
+      } finally {
+        setIsLoadingMemories(false);
+      }
+    };
+
+    if (user) {
+      loadMemories();
+    }
+  }, [user]);
+
   return (
     <PageContainer>
       <div className="flex items-center justify-between mb-6">
@@ -70,22 +91,14 @@ const Home = () => {
         <Heart className="text-primary" size={24} />
       </div>
       
-      <Card className="mb-4">
-        <h2 className="text-lg font-semibold mb-2">Today's Memory</h2>
-        <p className="text-text-light">Share a special moment from your day...</p>
-        <Button className="mt-4 w-full">
-          Create Memory
-        </Button>
-      </Card>
-
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mb-6">
         <Card>
           <Target className="text-primary mb-2" size={24} />
           <h3 className="font-semibold mb-2">Goals</h3>
           <p className="text-sm text-text-light">2 pending</p>
         </Card>
         <Link to="/shopping" className="block">
-          <Card className="cursor-pointer transition-all hover:shadow-md">
+          <Card className="cursor-pointer transition-all hover:shadow-md h-full">
             <ShoppingBag className="text-primary mb-2" size={24} />
             <h3 className="font-semibold mb-2">Shopping List</h3>
             <p className="text-sm text-text-light">
@@ -102,6 +115,58 @@ const Home = () => {
             )}
           </Card>
         </Link>
+      </div>
+
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Recent Memories</h2>
+          <Link to="/memories" className="text-primary text-sm">
+            Ver todas
+          </Link>
+        </div>
+        <div className="h-[40vh] overflow-y-auto space-y-4 pb-4">
+          {isLoadingMemories ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary"></div>
+            </div>
+          ) : memories.length > 0 ? (
+            memories.map((memory) => (
+              <Card key={memory.id} className="cursor-pointer hover:shadow-md transition-all">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-semibold">{memory.authorName}</p>
+                    <p className="text-sm text-text-light">
+                      {formatTimeAgo(memory.createdAt)}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm mb-3 line-clamp-3">{memory.text}</p>
+                <div className="flex items-center gap-4 text-sm text-text-light">
+                  <span className="flex items-center gap-1">
+                    <Heart 
+                      size={14} 
+                      className={memory.likes.includes(user?.uid || '') ? 'fill-primary text-primary' : ''}
+                    />
+                    {memory.likes.length}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle size={14} />
+                    {memory.comments.length}
+                  </span>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <Card className="text-center py-8">
+              <p className="text-text-light mb-4">No hay memorias aún</p>
+              <Link to="/memories">
+                <Button>
+                  Create Memory
+                </Button>
+              </Link>
+            </Card>
+          )}
+        </div>
       </div>
     </PageContainer>
   );

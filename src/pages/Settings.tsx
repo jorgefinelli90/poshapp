@@ -2,14 +2,12 @@ import React from 'react';
 import PageContainer from '../components/layout/PageContainer';
 import Card from '../components/ui/Card';
 import UserProfile from '../components/profile/UserProfile';
-import { Bell, Lock, Palette, HelpCircle } from 'lucide-react';
+import { Bell, Palette } from 'lucide-react';
 
 const Settings = () => {
   const settingsItems = [
     { icon: Bell, label: 'Notifications', onClick: () => {} },
-    { icon: Lock, label: 'Privacy', onClick: () => {} },
     { icon: Palette, label: 'Appearance', onClick: () => {} },
-    { icon: HelpCircle, label: 'Help & Support', onClick: () => {} },
   ];
 
   return (
