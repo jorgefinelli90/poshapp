@@ -11,7 +11,7 @@ const Lists = () => {
         <Card>
           <div className="flex items-center gap-2 mb-2">
             <ShoppingBag className="text-primary" size={24} />
-            <h2 className="text-lg font-semibold">Shopping List</h2>
+            <h2 className="text-lg font-semibold">Lista del super</h2>
           </div>
           <Button variant="outline" size="sm" className="w-full">View List</Button>
         </Card>

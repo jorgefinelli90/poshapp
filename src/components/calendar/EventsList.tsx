@@ -42,7 +42,7 @@ const EventsList: React.FC<EventsListProps> = ({ events, className = '' }) => {
 
   return (
     <Card className={className}>
-      <h3 className="text-lg font-semibold mb-4">All Events</h3>
+      <h3 className="text-lg font-semibold mb-4">Prox. eventos:</h3>
       <div className="space-y-6">
         {Object.entries(groupedEvents).map(([monthYear, monthEvents]) => (
           <div key={monthYear} className="space-y-2">

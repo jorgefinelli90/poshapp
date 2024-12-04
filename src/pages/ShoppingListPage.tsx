@@ -92,7 +92,7 @@ const ShoppingListPage = () => {
     if (!email) return { name: 'Desconocido', emoji: '👤' };
     const emailLower = email.toLowerCase();
     if (emailLower.startsWith('j')) {
-      return { name: 'Jorge', emoji: '👨Jorge' };
+      return { name: 'Jor', emoji: '👨Jor' };
     } else if (emailLower.startsWith('n')) {
       return { name: 'Nhorie', emoji: '👩Nhorie' };
     }

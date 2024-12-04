@@ -35,7 +35,7 @@ const getCreatorInfo = (email: string | undefined) => {
   if (!email) return { name: 'Desconocido', emoji: '👤' };
   const emailLower = email.toLowerCase();
   if (emailLower.startsWith('j')) {
-    return { name: 'Jorge', emoji: '👨' };
+    return { name: 'Jor', emoji: '👨' };
   } else if (emailLower.startsWith('n')) {
     return { name: 'Nhorie', emoji: '👩' };
   }
@@ -142,7 +142,7 @@ const Home = () => {
           <Link to="/shopping" className="block">
             <Card className="cursor-pointer transition-all hover:shadow-md h-full">
               <ShoppingBag className="text-primary mb-2" size={24} />
-              <h3 className="font-semibold mb-2">Shopping List</h3>
+              <h3 className="font-semibold mb-2">Lista del super</h3>
               <p className="text-sm text-text-light">
                 {isLoading ? (
                   <span className="inline-block animate-pulse">Cargando...</span>
